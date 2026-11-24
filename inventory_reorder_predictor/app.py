@@ -37,13 +37,13 @@ with tab1:
         c1, c2 = st.columns(2)
         name = c1.text_input("Product name", "Indomie noodles (carton)")
         category = c2.selectbox("Category", CATEGORIES)
-        c3, c4, c5 = st.columns(3)
+        c3, c4 = st.columns(2)
         stock = c3.number_input("Current stock (units)", 0, 100000, 12)
         s7 = c4.number_input("Avg. units sold per day (last 7 days)", 0.0, 10000.0, 5.2, 0.1)
+        c5, c6 = st.columns(2)
         s30 = c5.number_input("Avg. units sold per day (last 30 days)", 0.0, 10000.0, 4.9, 0.1)
-        c6, c7 = st.columns(2)
         lead = c6.number_input("Supplier delivery time (days)", 1, 60, 3)
-        price = c7.number_input("Cost per unit (₦)", 0, 100000000, 9000, 100)
+        price = st.number_input("Cost per unit (₦)", 0, 100000000, 9000, 100)
         go = st.form_submit_button("Predict", type="primary")
 
     if go:
@@ -56,9 +56,10 @@ with tab1:
         else:
             st.success(f"🟢 No need to reorder yet. Check again in about "
                        f"{r['days_until_reorder_point']:.0f} day(s).")
-        m1, m2, m3, m4 = st.columns(4)
+        m1, m2 = st.columns(2)
         m1.metric("Days of stock left", r["days_of_stock_left"])
         m2.metric("Chance of running out", f"{r['stockout_probability']:.0f}%")
+        m3, m4 = st.columns(2)
         m3.metric("Suggested quantity", int(r["suggested_quantity"]))
         m4.metric("Estimated cost", f"₦{r['estimated_cost_ngn']:,.0f}")
         st.caption(f"Risk level: {r['risk']}. Delivery takes {lead} day(s), so your stock must "
@@ -94,9 +95,11 @@ with tab3:
         st.dataframe(pd.DataFrame(m["classification"]).T.round(3))
         st.subheader("How many units? (regression)")
         st.dataframe(pd.DataFrame(m["regression"]).T.round(3))
-        a, b, c = st.columns(3)
-        for col, f in zip((a, b, c), ("confusion_matrix", "feature_importance",
-                                      "quantity_actual_vs_predicted")):
+        a, b = st.columns(2)
+        for col, f in zip((a, b), ("confusion_matrix", "feature_importance")):
             p = ROOT / "models" / f"{f}.png"
             if p.exists():
                 col.image(str(p))
+        p = ROOT / "models" / "quantity_actual_vs_predicted.png"
+        if p.exists():
+            st.image(str(p))
